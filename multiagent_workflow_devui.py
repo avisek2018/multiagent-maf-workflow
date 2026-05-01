@@ -1,4 +1,4 @@
-# v3 — DevUI integrated | clean shutdown | warnings suppressed
+
 import asyncio
 import logging
 import os
