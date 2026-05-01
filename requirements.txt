@@ -1,0 +1,5 @@
+agent-framework
+mcp
+anyio
+azure-identity
+python-dotenv
