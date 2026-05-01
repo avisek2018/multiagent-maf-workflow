@@ -1,19 +1,27 @@
 # Multi‑Agent Orchestration with Microsoft Agent Framework
-Multi‑Agent Research Orchestration with Microsoft Agent Framework
-This repository demonstrates a fan‑out / fan‑in multi‑agent orchestration pattern built using the Microsoft Agent Framework (MAF).
-It showcases how multiple specialized AI agents can run in parallel, retrieve grounded data via public MCP (Model Context Protocol) servers, and then converge into a single synthesized response.
 
-🧠 What This Project Does
-Given a medical or life‑sciences research topic (e.g. “cancer immunotherapy”), the system:
+This repository demonstrates a **fan‑out / fan‑in multi‑agent orchestration pattern** built using the **Microsoft Agent Framework (MAF)**.  
+It showcases how multiple specialized AI agents can run **in parallel**, retrieve grounded data via **public MCP (Model Context Protocol) servers**, and then **converge into a single synthesized response**.
 
-Fans the topic out to two specialized agents running in parallel
-Grounds each agent using publicly hosted MCP servers
-Merges the outputs into a single, structured summary
+---
 
-This pattern is particularly useful for research, analysis, and decision‑support scenarios where multiple perspectives must be combined deterministically.
+## 🧠 What This Project Does
 
-🏗 Architecture Overview
-Workflow topology (fan‑out / fan‑in):
+Given a medical or life‑sciences research topic (for example, *“cancer immunotherapy”*), the system:
+
+1. Fans the topic out to **two specialized agents running in parallel**
+2. Grounds each agent using **publicly hosted MCP servers**
+3. Merges the outputs into a **single, structured summary**
+
+This pattern is well‑suited for **research, analysis, and decision‑support scenarios** where insights must be drawn from multiple authoritative sources.
+
+---
+
+## 🏗 Architecture Overview
+
+**Workflow topology (fan‑out / fan‑in):**
+
+```
 User Input
    │
 Dispatcher (start node)
@@ -21,105 +29,107 @@ Dispatcher (start node)
    ├── PubMed Research Agent ──┐
    │                           ├── Summarizer Agent → Final Output
    └── Clinical Trials Agent ──┘
+```
 
-Key Components
+### Key Components
 
+- **Dispatcher (Executor)**
+  - Entry point of the workflow
+  - Broadcasts the input topic to downstream agents
 
-Dispatcher (Executor)
+- **PubMed Research Agent**
+  - Connects to a **public PubMed MCP server**
+  - Retrieves scientific literature, papers, and metadata
 
-Entry point of the workflow
-Broadcasts the input topic to downstream agents
+- **Clinical Trials Agent**
+  - Connects to a **public ClinicalTrials.gov MCP server**
+  - Retrieves active and historical clinical trial data
 
+- **Summarizer Agent**
+  - Performs fan‑in
+  - Synthesizes outputs from both agents into a single report
 
+---
 
-PubMed Research Agent
+## 🔌 Model Context Protocol (MCP)
 
-Connects to a public PubMed MCP server
-Retrieves scientific literature, papers, and metadata
+This project uses `MCPStreamableHTTPTool` to connect agents to **external MCP servers** over streamable HTTP.
 
-
-
-Clinical Trials Agent
-
-Connects to a public ClinicalTrials.gov MCP server
-Retrieves active and historical clinical trial data
-
-
-
-Summarizer Agent
-
-Performs fan‑in
-Synthesizes outputs from both agents into a single report
-
-
-
-
-🔌 Model Context Protocol (MCP)
-This project uses MCPStreamableHTTPTool to connect agents to external MCP servers over streamable HTTP.
 Public MCP endpoints used:
+- **PubMed MCP** – Biomedical literature and metadata
+- **ClinicalTrials.gov MCP** – Structured clinical trial information
 
+### Why MCP?
+- Tool‑grounded responses (reduced hallucination)
+- Clean separation between orchestration logic and data providers
+- Easy replacement with private or internal MCP servers later
 
-PubMed MCP
-Accesses PubMed / NCBI literature
+---
 
+## 🔁 Orchestration Pattern
 
-ClinicalTrials.gov MCP
-Accesses structured clinical trial data
+### Fan‑Out
+- A single input message is sent to multiple agents simultaneously
+- Agents run **concurrently**, each using different tools and data sources
 
+### Fan‑In
+- The workflow waits for **all parallel agents** to complete
+- Results are routed into a single summarization agent
 
-Benefits of using MCP:
+This pattern is implemented directly using `WorkflowBuilder.add_edge(...)`, without custom threading or async coordination logic.
 
-Tool‑grounded responses (reduced hallucination)
-Clean separation between orchestration logic and data providers
-Easy swap‑in of internal or private MCP servers later
+---
 
+## 🧪 Running the Project
 
-🔁 Orchestration Pattern
-Fan‑Out
+### Prerequisites
+- Python 3.10+
+- Microsoft Agent Framework
+- Azure OpenAI or OpenAI‑compatible endpoint
+- (Optional) Agent Framework DevUI
 
-A single input message is sent to multiple agents simultaneously
-Agents run concurrently, each using different tools and data sources
+### Install Dependencies
+```bash
+pip install agent-framework agent-framework-devui python-dotenv
+```
 
-Fan‑In
+### Run in CLI Mode
+```bash
+python multiagent_workflow.py
+```
 
-The workflow waits for all parallel agents to complete
-Results are routed into a single summarization agent
+### Run with DevUI (Browser‑based Debugging)
+```bash
+python multiagent_workflow.py --devui
+```
 
-This pattern is implemented directly using WorkflowBuilder.add_edge(...), without custom threading or async coordination logic.
+DevUI provides:
+- Workflow visualization
+- Step‑by‑step agent execution
+- OpenAI‑compatible `/v1` API for testing
 
-🧪 Running the Project
-Prerequisites
+---
 
-Python 3.10+
-Microsoft Agent Framework
-Azure OpenAI or OpenAI‑compatible endpoint
-(Optional) Agent Framework DevUI
+## 🎯 Why This Pattern Matters
 
-Install dependencies
-Shellpip install agent-framework agent-framework-devui python-dotenvShow more lines
-Run in CLI mode
-Shellpython multiagent_workflow.pyShow more lines
-Run with DevUI (browser-based debugging)
-Shellpython multiagent_workflow.py --devuiShow more lines
-This launches a local DevUI instance with:
+- ✅ Parallel execution reduces latency
+- ✅ Specialized agents improve output quality
+- ✅ Explicit orchestration improves transparency and auditability
+- ✅ MCP enables reusable, protocol‑based integrations
+- ✅ Works locally and scales toward enterprise‑grade deployments
 
-Workflow visualization
-Step‑by‑step agent execution
-OpenAI‑compatible /v1 API
+---
 
+## 🔮 Extensions & Ideas
 
-🎯 Why This Pattern Matters
+- Add additional specialist agents (e.g., FDA filings, patents, internal knowledge)
+- Replace public MCP servers with private or internal ones
+- Add evaluation, traceability, or human‑in‑the‑loop approvals
+- Expose the workflow via an API or UI (Teams, web app, etc.)
 
-✅ Parallel execution reduces latency
-✅ Specialized agents improve output quality
-✅ Explicit orchestration improves transparency and auditability
-✅ MCP enables reusable, protocol‑based integrations
-✅ Works locally and scales toward enterprise‑grade deployments
+---
 
+## 📜 Disclaimer
 
-🔮 Extensions & Ideas
-
-Add more specialist agents (e.g. FDA filings, patents, internal knowledge)
-Replace public MCP servers with private/internal ones
-Add evaluation, traceability, or human‑in‑the‑loop approvals
-Host the workflow behind an API or UI (Teams, web app, etc.)
+This project is for **educational and experimental purposes**.  
+Public MCP servers used here are maintained by third parties—review and govern external data usage appropriately before production use.
