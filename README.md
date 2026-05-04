@@ -95,12 +95,12 @@ pip install agent-framework agent-framework-devui python-dotenv
 
 ### Run in CLI Mode
 ```bash
-python multiagent_workflow.py
+python multiagent_workflow_devui.py
 ```
 
 ### Run with DevUI (Browser‑based Debugging)
 ```bash
-python multiagent_workflow.py --devui
+python multiagent_workflow_devui.py --devui
 ```
 
 DevUI provides:
